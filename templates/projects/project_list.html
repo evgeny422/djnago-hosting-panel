@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<table class="table table-hover">
+    <thead>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Path</th>
+    </thead>
+    <tbody>
+    {% for project in project_list %}
+    <tr>
+        <th scope="row"></th>
+        <td>{{ project.project_path }}</td>
+        <td>
+
+            <button type="button" class="btn btn-outline-dark">
+                <a href="{% url 'task_id' project.id %}" style="text-decoration:none;">
+                    Detail
+                </a>
+            </button>
+
+
+            <button type="button" class="btn btn-outline-dark">
+                <a href="{% url 'pull' project.id %}" style="text-decoration:none;">
+                    Pull
+                </a>
+            </button>
+
+            <button type="button" class="btn btn-outline-dark">
+                <a href="{% url 'static' project.id %}" style="text-decoration:none;">
+                    Apply static
+                </a>
+            </button>
+
+
+            <button type="button" class="btn btn-outline-dark">
+                <a href="{% url 'access' project.id %}" style="text-decoration:none;">
+                    Access logs
+                </a>
+            </button>
+
+            <button type="button" class="btn btn-outline-dark">
+                <a href="{% url 'error' project.id %}" style="text-decoration:none;">
+                    Error logs
+                </a>
+            </button>
+
+            <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#myModal">
+                Restart Project
+            </button>
+
+            <div class="modal fade" id="myModal">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">Enter sudo password</h4>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+
+                        <!-- Modal body -->
+                        <div class="modal-body">
+                            <form class="d-flex" action="{% url 'restart_serve' project.id %}" method="post">
+                                {% csrf_token %}
+                                <input class="form-control mr-2" type="password" placeholder="Password"
+                                       name="key" aria-label="key">
+                                <button type="submit" class="btn btn-outline-dark" type="submit">
+                                    Apply
+                                </button>
+                            </form>
+                        </div>
+
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!--<button type="button" class="btn btn-outline-dark">-->
+                <!--<a href="{% url 'restart' project.id %}" style="text-decoration:none;">-->
+                    <!--Restart gunicorn-->
+                <!--</a>-->
+            <!--</button>-->
+
+            <button type="button" class="btn btn-outline-dark">
+                <a href="{% url 'migrate' project.id  %}" style="text-decoration:none;">
+                    Migrate
+                </a>
+            </button>
+
+
+            </button>
+
+
+            <div class="d-inline-flex">
+                <form class="d-flex" action="{% url 'branch'  project.id %}" method="get">
+                    <select name="branch" id="q">
+                        {% for branch in project.branch.all %}
+                        <option value={{branch.id}}>{{branch.title}}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-outline-dark" type="submit">
+                        Apply
+                    </button>
+                </form>
+            </div>
+        </td>
+    </tr>
+    {% endfor %}
+
+    </tbody>
+</table>
+
+{% endblock content %}

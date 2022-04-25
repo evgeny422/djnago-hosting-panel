@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+
+
+<form class="d-flex" action="{% url 'shell' pk %}" method="get">
+    <input class="form-control mr-2 cmd" type="text" placeholder="Введите команды через ' ; '" name="task"
+           aria-label="task">
+    <button class="btn btn-outline-dark send-cmd" type="button">
+        Use shell commands
+    </button>
+</form>
+
+<div id="clear" class="btn btn-danger">Clear</div>
+
+<div id="resp">{{ response }}</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+
+<script>
+    jQuery(document).ready(function ($) {
+        let cmds = [];
+
+        $(document).on({
+            'click': function (el) {
+                cmds.push($('.cmd').val());
+                console.log(cmds);
+
+                $.ajax({
+                    url: '{% url 'shell' pk %}',
+                    type: 'GET',
+                    data: {
+                        task: cmds.join(';')
+                    },
+                    success: function (response) {
+                        console.log(response)
+                        $("#resp").text(response);
+                        cmds = [];
+                    }
+                });
+
+            },
+        }, '.send-cmd')
+
+        $(function () {
+            $("#clear").click(function () {
+                $("#resp").text('');
+                cmds = [];
+            });
+        });
+    });
+</script>
+
+{% endblock content %}

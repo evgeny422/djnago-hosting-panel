@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div style="margin-bottom:5px;">
+    Введите данные GIT
+</div>
+<form action="{% url 'pull' pk %}" method="post">
+    {% csrf_token%}
+    <div>
+        {{form.as_p}}
+
+        <div style="display:box">
+            <input type="radio" value="1" name="checkout">
+            <span>Сохранить данные</span>
+        </div>
+        <button class="btn btn-dark btn-lg" type="submit">Pull</button>
+
+    </div>
+</form>
+{% endblock content %}
