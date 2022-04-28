@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 
+from app.forms import GitModelForm
 from app.models import Project, Git, GitBranch
 
 
@@ -14,6 +15,7 @@ class ProjectAdminModel(admin.ModelAdmin):
 
 @admin.register(Git)
 class GitAdminModel(admin.ModelAdmin):
+    form = GitModelForm
     list_display = ('pk', 'username')
 
 
