@@ -2,17 +2,18 @@ from pathlib import Path
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
+SECRET_KEY = 'django-insecure-oo7t92o#3q9o2$wblqa(^fuo*lnwr$*9w@z@8*94y_svn%3z_b'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+# '95.190.34.194',
 ALLOWED_HOSTS = ['localhost', '192.168.1.15', '0.0.0.0', '127.0.0.1']
 
 # Application definition
@@ -36,6 +37,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'middleware.history_middleware.HistoryMiddleware',
+
 ]
 
 ROOT_URLCONF = 'myproject.urls'
@@ -61,16 +65,6 @@ WSGI_APPLICATION = 'myproject.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': 'myproject',
-#         'USER': 'myprojectuser',
-#         'PASSWORD': 'password',
-#         'HOST': 'localhost',
-#         'PORT': '',
-#     }
-# }
 
 DATABASES = {
     'default': {
@@ -121,4 +115,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 bash_dir_path = os.path.join(BASE_DIR, 'bash')
 
-base_salt = 'ur_salt'
+base_salt = 'DTLWPDgsge1g5_3'
+
+LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = "task"

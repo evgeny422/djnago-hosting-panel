@@ -2,7 +2,7 @@ import os
 
 import pexpect
 
-from app.models import Project
+from app.models import ProjectAbstract
 from app.services.mixins import ShellConnection
 from myproject.settings import bash_dir_path
 
@@ -23,10 +23,10 @@ class LogsManager:
 
 class ServeManager(ShellConnection):
 
-    def __init__(self, project: Project):
+    def __init__(self, project: ProjectAbstract):
         self.project = project
 
-    def get_project(self) -> Project:
+    def get_project(self) -> ProjectAbstract:
         return self.project
 
     def return_acces_log(self):

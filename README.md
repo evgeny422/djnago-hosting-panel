@@ -1,1 +1,0 @@
-# djnago-hosting-panel

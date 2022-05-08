@@ -19,7 +19,7 @@ static
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
-
+.servises/test_code.py
 
 .env 
 .venv 

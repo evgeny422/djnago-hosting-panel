@@ -1,4 +1,5 @@
 import os
+import re
 from abc import abstractmethod
 from random import choice
 from string import ascii_uppercase
@@ -20,16 +21,22 @@ class GitAbstract:
     def get_password(self):
         pass
 
-    def get_remote_name(self):
-        return 'origin'
-
-    def get_branch(self):
-        return 'main'
-
 
 class ProjectAbstract:
     @abstractmethod
     def get_path(self):
+        pass
+
+    @abstractmethod
+    def get_access_log_path(self):
+        pass
+
+    @abstractmethod
+    def get_error_log_path(self):
+        pass
+
+    @abstractmethod
+    def get_gunicorn_path(self):
         pass
 
     @abstractmethod
@@ -44,8 +51,13 @@ class ProjectAbstract:
     def get_git_path(self):
         pass
 
+    @abstractmethod
+    def get_env_path(self):
+        pass
+
 
 class Project(ProjectAbstract, models.Model):
+    " Project\'s config "
     project_path = models.CharField(max_length=150)
     name = models.CharField('Название', max_length=300, blank=True)
 
@@ -55,8 +67,8 @@ class Project(ProjectAbstract, models.Model):
     git_path = models.CharField('.git path', max_length=300, default=None, null=True, blank=True)
     gunicorn_path = models.CharField('Gunicorn path', max_length=300, default=None, null=True, blank=True)
 
+    branch_now = models.CharField('Branch', max_length=300, default='main')
     default_git = models.ForeignKey("Git", on_delete=models.SET_NULL, null=True, blank=True, related_name='default_git')
-    branch = models.ManyToManyField("GitBranch")
 
     users = models.ManyToManyField(User, related_name='developers', verbose_name='Developers')
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, default=1)
@@ -105,11 +117,20 @@ class Project(ProjectAbstract, models.Model):
     def get_project_name(self):
         return self.name
 
+    def return_repo_branch(self):
+        path = os.path.join(self.get_git_path(), 'config')
+        with open(path) as f:
+            lines = f.read()
+            branch_in_lines = re.findall(r'\[branch (.*)\]', lines, flags=re.MULTILINE)
+            branches = [re.sub('[ \"| \']', "", branch_in_lines[i]) for i in range(len(branch_in_lines))]
+        return branches
+
     def __str__(self):
         return f'{self.project_path}'
 
 
 class Git(GitAbstract, models.Model):
+    "Git account info"
     username = models.CharField(max_length=100, null=True, blank=True)
     password = models.CharField(max_length=100, null=True, blank=True)
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
@@ -135,8 +156,23 @@ class Git(GitAbstract, models.Model):
         return '{}'.format(self.username)
 
 
-class GitBranch(models.Model):
-    title = models.CharField(max_length=100, null=True, blank=True)
+class Permissions(models.Model):
+    """Permissions class for users (developers) """
+    CHOISES = (
+
+        (1, "shell"),
+        (2, "serve"),
+        (3, "git"),
+    )
+    class_permission = models.PositiveSmallIntegerField(choices=CHOISES)
+    user = models.ManyToManyField(User, related_name='permission')
+
+    class Meta:
+        verbose_name = 'Права доступа'
+        verbose_name_plural = 'Права доступа'
 
     def __str__(self):
-        return f'{self.title}'
+        return f'{self.class_permission}'
+
+    def __repr__(self):
+        return f'{self.class_permission}'

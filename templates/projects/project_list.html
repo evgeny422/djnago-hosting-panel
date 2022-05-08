@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
 
+
 <table class="table table-hover">
     <thead>
     <tr>
@@ -11,7 +12,8 @@
     {% for project in project_list %}
     <tr>
         <th scope="row"></th>
-        <td>{{ project.project_path }}</td>
+        <td><p>{{ project.name }}</p>
+            <p>branch:{{ project.branch_now}}</p></td>
         <td>
 
             <button type="button" class="btn btn-outline-dark">
@@ -22,17 +24,12 @@
 
 
             <button type="button" class="btn btn-outline-dark">
-                <a href="{% url 'pull' project.id %}" style="text-decoration:none;">
-                    Pull
-                </a>
-            </button>
-
-            <button type="button" class="btn btn-outline-dark">
                 <a href="{% url 'static' project.id %}" style="text-decoration:none;">
                     Apply static
                 </a>
             </button>
-
+            {% for p in perm %}
+            {% if 2 == p.class_permission %}
 
             <button type="button" class="btn btn-outline-dark">
                 <a href="{% url 'access' project.id %}" style="text-decoration:none;">
@@ -49,6 +46,8 @@
             <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#myModal">
                 Restart Project
             </button>
+            {%endif%}
+            {%endfor%}
 
             <div class="modal fade" id="myModal">
                 <div class="modal-dialog">
@@ -81,11 +80,6 @@
                 </div>
             </div>
 
-            <!--<button type="button" class="btn btn-outline-dark">-->
-                <!--<a href="{% url 'restart' project.id %}" style="text-decoration:none;">-->
-                    <!--Restart gunicorn-->
-                <!--</a>-->
-            <!--</button>-->
 
             <button type="button" class="btn btn-outline-dark">
                 <a href="{% url 'migrate' project.id  %}" style="text-decoration:none;">
@@ -98,16 +92,38 @@
 
 
             <div class="d-inline-flex">
+                {% for p in perm %}
+                {% if 3 == p.class_permission %}
+                <button type="button" class="btn btn-outline-dark">
+                    <a href="{% url 'pull' project.id %}" style="text-decoration:none;">
+                        Pull
+                    </a>
+                </button>
+
                 <form class="d-flex" action="{% url 'branch'  project.id %}" method="get">
                     <select name="branch" id="q">
-                        {% for branch in project.branch.all %}
-                        <option value={{branch.id}}>{{branch.title}}</option>
+                        {% for branch in project.return_repo_branch %}
+                        <option value={{branch}}>{{branch}}</option>
                         {% endfor %}
                     </select>
                     <button type="submit" class="btn btn-outline-dark" type="submit">
                         Apply
                     </button>
                 </form>
+
+                {% endif %}
+                {% endfor %}
+
+                {% for p in perm %}
+                {% if 1 == p.class_permission %}
+
+                <button type="button" class="btn btn-outline-dark">
+                    <a href="{% url 'shell_commands' project.id %}" style="text-decoration:none;">
+                        Shell
+                    </a>
+                </button>
+                {%endif%}
+                {%endfor%}
             </div>
         </td>
     </tr>

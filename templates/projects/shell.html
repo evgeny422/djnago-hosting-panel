@@ -18,37 +18,45 @@
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
 <script>
-    jQuery(document).ready(function ($) {
-        let cmds = [];
+        jQuery(document).ready(function ($) {
+            let cmds = [];
 
-        $(document).on({
-            'click': function (el) {
-                cmds.push($('.cmd').val());
-                console.log(cmds);
+            $(document).on({
+                'click': function (el) {
+                    cmds.push($('.cmd').val());
+                    console.log(cmds);
 
-                $.ajax({
-                    url: '{% url 'shell' pk %}',
-                    type: 'GET',
-                    data: {
-                        task: cmds.join(';')
-                    },
-                    success: function (response) {
-                        console.log(response)
-                        $("#resp").text(response);
-                        cmds = [];
-                    }
-                });
+                    $.ajax({
+                        url: '{% url 'shell' pk %}',
+                        type: 'GET',
+                        data: {
+                            task: cmds.join(';')
+                        },
+                        success: function (response) {
+                            console.log(response.split('\n'))
+                            $("#resp").text(response);
+                            cmds =[];
+                        }
+                    });
 
-            },
-        }, '.send-cmd')
+                },
+            }, '.send-cmd')
 
-        $(function () {
-            $("#clear").click(function () {
-                $("#resp").text('');
-                cmds = [];
-            });
-        });
+            $(function(){
+    $("#clear").click(function(){
+        $("#resp").text('');
+        cmds=[];
+
     });
+});
+
+
+        });
+
+
+
+
+
 </script>
 
 {% endblock content %}
