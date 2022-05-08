@@ -2,7 +2,11 @@ from django.contrib import admin
 from django.contrib.admin.models import LogEntry
 
 from app.forms import GitModelForm
+<<<<<<< HEAD
 from app.models import Project, Git, Permissions
+=======
+from app.models import Project, Git, GitBranch
+>>>>>>> 2a4f0a8a1aa3e283e83548a16de39e5cf2473872
 
 
 @admin.register(Project)
