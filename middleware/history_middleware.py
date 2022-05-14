@@ -1,7 +1,7 @@
 import os
 import datetime
 
-from myproject.settings import BASE_DIR
+from config.settings import BASE_DIR
 
 
 class HistoryMiddleware:

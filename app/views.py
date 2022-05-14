@@ -17,7 +17,7 @@ from app.services.django_service import ProjectManager
 from app.services.git import ProjectGit
 from app.services.nginx import ServeManager
 from permissions.developers_permissions import ServeRequiredMixin, GitRequiredMixin, ShellRequiredMixin
-from servises.exception_handling import base_view
+from serviсes.exception_handling import base_view
 
 
 class ProjectListView(LoginRequiredMixin, ListView):

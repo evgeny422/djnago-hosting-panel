@@ -9,7 +9,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 
-from myproject.settings import base_salt, bash_dir_path
+from config.settings import base_salt, bash_dir_path
 
 
 class GitAbstract:

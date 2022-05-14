@@ -2,7 +2,7 @@ import os
 
 from app.models import ProjectAbstract
 from app.services.mixins import ShellConnection
-from myproject.settings import bash_dir_path
+from config.settings import bash_dir_path
 
 
 class ProjectManager(ShellConnection):
