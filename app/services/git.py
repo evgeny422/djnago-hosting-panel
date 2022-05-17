@@ -18,8 +18,17 @@ class ProjectGit(ShellConnection):
     def get_git_path(self):
         return self.get_project().get_git_path()
 
-    def create_url(self, l, p):
+    def create_tspu_url(self, l, p):
         return f'https://{l}:{p}@gitlab.tspu.edu.ru/{l}/{self.return_repo()}.git'
+
+    def get_url(self, l='login', p='password'):
+        path = os.path.join(self.get_git_path(), 'config')
+        with open(path) as file:
+            lines = file.readlines()
+            index_remote = lines.index('[remote "origin"]\n')
+            link = lines[index_remote + 1].strip().split('=')[-1]
+
+            return link[0:9] + str(l) + ':' + str(p) + '@' + link[9:]
 
     def return_repo(self):
         path = os.path.join(self.get_git_path(), 'config')
@@ -36,7 +45,7 @@ class ProjectGit(ShellConnection):
 
             path=os.path.join(bash_dir_path, 'pull.sh'),
             param=self.project_path(),
-            url=self.create_url(username, password)
+            url=self.get_url(username, password),
         )
 
     def branch_apply(self, branch: str):

@@ -1,23 +1,22 @@
 import subprocess
 
-from django.contrib.admin.models import LogEntry
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
-from django.core.signals import request_finished
-from django.dispatch import receiver
-from django.http import HttpResponse
+from django.core.exceptions import PermissionDenied
+
+from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.generic import ListView, DetailView
 
-from app.forms import GitModelForm, LoginUserForm
+from app.forms import GitModelForm, LoginUserForm, SudoEnterForm
 from app.models import Project, Git, Permissions
 from app.services.django_service import ProjectManager
 from app.services.git import ProjectGit
 from app.services.nginx import ServeManager
 from permissions.developers_permissions import ServeRequiredMixin, GitRequiredMixin, ShellRequiredMixin
-from serviсes.exception_handling import base_view
+from services.exception_handling import base_view
+from services.log_manage import LogWriter
 
 
 class ProjectListView(LoginRequiredMixin, ListView):
@@ -33,6 +32,7 @@ class ProjectListView(LoginRequiredMixin, ListView):
         context = super().get_context_data(*args, **kwargs)
         user = self.request.user.id
         context['perm'] = Permissions.objects.prefetch_related('user').filter(user=user)
+        context['sudo_form'] = SudoEnterForm
         return context
 
 
@@ -46,15 +46,17 @@ class ProjectDetailView(LoginRequiredMixin, DetailView):
 class GunicornRestart(LoginRequiredMixin, ServeRequiredMixin, View):
     """Restart serve"""
 
-    @base_view
+    # @base_view
     def post(self, request, *args, **kwargs):
-        try:
-            project = ServeManager(Project.objects.get(id=kwargs['pk']))
-            key = request.POST.get('key')
-            response = project.restart_serve(key=key)
-            return render(request, 'projects/shell.html', {'response': response, 'pk': kwargs['pk']})
-        except:
-            raise ValueError('Invalid sudo key')
+        project = ServeManager(Project.objects.get(id=kwargs['pk']))
+        sudo_key = request.POST.get('sudo_key')
+        form = SudoEnterForm(request.POST)
+        if form.is_valid():
+            response = project.restart_serve(key=sudo_key)
+            LogWriter(request).write_log()
+            return redirect('task')
+
+        raise PermissionDenied
 
 
 class ShowAccessLog(LoginRequiredMixin, ServeRequiredMixin, View):
@@ -83,9 +85,10 @@ class MigrationApply(LoginRequiredMixin, View):
         try:
             project = ProjectManager(Project.objects.get(id=kwargs['pk']))
             response = project.migration_apply()
+            LogWriter(request).write_log()
             return HttpResponse(response)
         except:
-            raise Exception
+            raise Http404('Object not exists')
 
 
 class StaticApply(LoginRequiredMixin, View):
@@ -94,11 +97,13 @@ class StaticApply(LoginRequiredMixin, View):
     @base_view
     def get(self, request, *args, **kwargs):
         try:
-            project = ProjectManager(Project.objects.get(id=kwargs['pk']))
-            response = project.apply_collectstatic()
-            return HttpResponse(response)
+            pr = Project.objects.get(id=kwargs['pk'])
         except:
-            raise Exception
+            raise Http404('Object not exists')
+        project = ProjectManager(pr)
+        response = project.apply_collectstatic()
+        LogWriter(request).write_log()
+        return HttpResponse(response)
 
 
 class GitBranch(LoginRequiredMixin, GitRequiredMixin, View):
@@ -108,14 +113,17 @@ class GitBranch(LoginRequiredMixin, GitRequiredMixin, View):
     def get(self, request, *args, **kwargs):
         try:
             project = Project.objects.get(id=kwargs['pk'])
-            pm = ProjectGit(project)
-            branch = request.GET.get('branch')
-            response = pm.branch_apply(branch)
-            project.branch_now = branch
-            project.save()
-            return render(request, 'projects/shell.html', {'response': response, 'pk': kwargs['pk']})
         except:
-            raise Exception
+            raise Http404('Object not exists')
+        pm = ProjectGit(project)
+        branch = request.GET.get('branch')
+        response = pm.branch_apply(branch)
+        project.branch_now = branch
+        project.save()
+        response += pm.get_url()
+
+        LogWriter(request).write_log()
+        return render(request, 'projects/shell.html', {'response': response, 'pk': kwargs['pk']})
 
 
 class GitPull(LoginRequiredMixin, GitRequiredMixin, View):
@@ -132,6 +140,8 @@ class GitPull(LoginRequiredMixin, GitRequiredMixin, View):
                 'password': f'{account.get_password()}'
             }
             response = pm.pull_private_rep(username=git.get('login', None), password=git.get('password', None))
+            LogWriter(request).write_log()
+
             return render(request, 'projects/shell.html', {'response': response, 'pk': kwargs['pk']})
         except:
             form = GitModelForm
@@ -160,7 +170,9 @@ class GitPull(LoginRequiredMixin, GitRequiredMixin, View):
             username=git.get('login', None),
             password=git.get('password', None)
         )
-        return render(request, 'projects/shell.html', {'response': response, 'pk': kwargs['pk']})
+        LogWriter(request).write_log()
+
+        return HttpResponse(response)
 
 
 class ShellView(View):
@@ -183,6 +195,7 @@ class ShellApplyCommands(LoginRequiredMixin, ShellRequiredMixin, View):
             raise ValueError('Не допустимая команда')
 
         commands_apply = subprocess.check_output(f'cd {project.get_path()};{commands}', shell=True).decode()
+        LogWriter(request).write_log()
         return HttpResponse(commands_apply)
 
 

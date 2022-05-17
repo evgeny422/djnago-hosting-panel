@@ -60,12 +60,12 @@
                         </div>
 
                         <!-- Modal body -->
-                        <div class="modal-body">
+                        <div class="modal-body d-flex">
                             <form class="d-flex" action="{% url 'restart_serve' project.id %}" method="post">
                                 {% csrf_token %}
-                                <input class="form-control mr-2" type="password" placeholder="Password"
-                                       name="key" aria-label="key">
-                                <button type="submit" class="btn btn-outline-dark" type="submit">
+                                {{ sudo_form.non_field_errors }}
+                                {{sudo_form.as_p}}
+                                <button type="submit" class="btn btn-outline-dark btn-sm" type="submit">
                                     Apply
                                 </button>
                             </form>
@@ -124,6 +124,8 @@
                 </button>
                 {%endif%}
                 {%endfor%}
+
+
             </div>
         </td>
     </tr>

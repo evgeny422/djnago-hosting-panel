@@ -7,3 +7,28 @@
   4)  обновление статики;
   5)  перезагрузка сервиса Gunicorn;
   6)  доступ к консоли.
+
+Необходимо создать переменную окружения secret_key (переменная хранится в ОС), значение которой, соответствует паролю sudo:
+```
+nano ~/.bashrc
+export secret_key= пароль sudo
+source ~/.bashrc
+```
+
+Создать и активировать виртуальное окружение:
+```
+  python3 -m venv venv
+  source venv/bin/activate 
+```
+Установить зависимости:
+```
+  pip install -r req.txt
+```
+Выполнить миграции:
+```
+  python3 manage.py migrate
+  ```
+Запустить проект:
+```
+  python3 manage.py runserver
+```

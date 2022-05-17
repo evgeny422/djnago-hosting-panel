@@ -57,7 +57,7 @@ class ProjectAbstract:
 
 
 class Project(ProjectAbstract, models.Model):
-    " Project\'s config "
+    " Project's config "
     project_path = models.CharField(max_length=150)
     name = models.CharField('Название', max_length=300, blank=True)
 
@@ -123,6 +123,7 @@ class Project(ProjectAbstract, models.Model):
             lines = f.read()
             branch_in_lines = re.findall(r'\[branch (.*)\]', lines, flags=re.MULTILINE)
             branches = [re.sub('[ \"| \']', "", branch_in_lines[i]) for i in range(len(branch_in_lines))]
+
         return branches
 
     def __str__(self):
@@ -133,7 +134,7 @@ class Git(GitAbstract, models.Model):
     "Git account info"
     username = models.CharField(max_length=100, null=True, blank=True)
     password = models.CharField(max_length=100, null=True, blank=True)
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
+    user = models.OneToOneField(User, primary_key=True, on_delete=models.CASCADE)
     salt = models.CharField(max_length=100, editable=False, default=None, null=True)
 
     class Meta:

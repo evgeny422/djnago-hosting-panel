@@ -12,12 +12,9 @@ class LogsManager:
         self._log_path = log_path
 
     def return_massage(self):
-        try:
-            f = open(self._log_path, 'r')
-        except:
-            raise ValueError('File not readable ')
-        file_content = f.read()
-        f.close()
+        with open(self._log_path, 'r', encoding='utf-8') as f:
+            file_content = f.readlines()[-300:]
+
         return file_content
 
 
